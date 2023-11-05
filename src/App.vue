@@ -11,80 +11,66 @@
       <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
         <div class="flex flex-col space-y-3 rounded-md shadow-sm -space-y-px">
           <div>
-            <label for="email-address" class="block text-sm font-medium text-gray-700">
-              Email address
-            </label>
+            <label for="email-address" class="block text-sm font-medium text-gray-700">Email address</label>
             <input
+                id="email-address"
                 v-model="form.email"
                 @input="validateEmailField"
-                id="email-address"
-                name="email"
                 type="email"
                 autocomplete="email"
                 required
-                class="rounded-md w-full px-3 py-2 border"
-                :class="validation.email.valid ? 'border-gray-300' : 'border-red-500'"
+                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
             />
-            <p v-if="!validation.email.valid" class="text-red-500 text-sm">{{ validation.email.message }}</p>
+            <p v-if="validation.email.message" class="text-red-500 text-xs italic">{{ validation.email.message }}</p>
           </div>
           <div>
             <label for="name" class="block text-sm font-medium text-gray-700">Full name</label>
             <input
+                id="name"
                 v-model="form.name"
                 @input="validateNameField"
-                id="name"
-                name="name"
                 type="text"
                 autocomplete="name"
                 required
-                class="rounded-md w-full px-3 py-2 border"
-                :class="validation.name.valid ? 'border-gray-300' : 'border-red-500'"
+                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Full name"
             />
-            <p v-if="!validation.name.valid" class="text-red-500 text-sm">{{ validation.name.message }}</p>
+            <p v-if="validation.name.message" class="text-red-500 text-xs italic">{{ validation.name.message }}</p>
           </div>
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
             <input
+                id="password"
                 v-model="form.password"
                 @input="validatePasswordField"
-                id="password"
-                name="password"
                 type="password"
                 autocomplete="new-password"
                 required
-                class="rounded-md w-full px-3 py-2 border"
-                :class="validation.password.valid ? 'border-gray-300' : 'border-red-500'"
+                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
             />
-            <p v-if="!validation.password.valid" class="text-red-500 text-sm">{{ validation.password.message }}</p>
+            <p v-if="validation.password.message" class="text-red-500 text-xs italic">{{ validation.password.message }}</p>
           </div>
           <div>
-            <label for="password-again" class="block text-sm font-medium text-gray-700">
-              Password again
-            </label>
+            <label for="password-again" class="block text-sm font-medium text-gray-700">Password again</label>
             <input
+                id="password-again"
                 v-model="form.passwordConfirmation"
                 @input="validatePasswordConfirmationField"
-                id="password-again"
-                name="password-again"
                 type="password"
                 autocomplete="new-password"
                 required
-                class="rounded-md w-full px-3 py-2 border"
-                :class="validation.passwordConfirmation.valid ? 'border-gray-300' : 'border-red-500'"
+                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Password again"
             />
-            <p v-if="!validation.passwordConfirmation.valid" class="text-red-500 text-sm">{{ validation.passwordConfirmation.message }}</p>
+            <p v-if="validation.passwordConfirmation.message" class="text-red-500 text-xs italic">{{ validation.passwordConfirmation.message }}</p>
           </div>
         </div>
         <div>
           <button
-              type="submit"
-              class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600"
-              :class="{ 'opacity-50 cursor-not-allowed': !isValid }"
               :disabled="!isValid"
+              class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Sign Up
           </button>
@@ -105,39 +91,74 @@ const form = reactive({
 });
 
 const validation = reactive({
-  email: { valid: true, message: '' },
-  name: { valid: true, message: '' },
-  password: { valid: true, message: '' },
-  passwordConfirmation: { valid: true, message: '' },
+  email: { valid: false, message: '' },
+  name: { valid: false, message: '' },
+  password: { valid: false, message: '' },
+  passwordConfirmation: { valid: false, message: '' },
 });
 
-const validateEmail = (email: string) => {
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(email.toLowerCase());
-};
-
+const emailRegex = new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
 const validateEmailField = () => {
-  validation.email.valid = validateEmail(form.email);
-  validation.email.message = validation.email.valid ? '' : 'Please enter a valid email address.';
+  if (!form.email) {
+    validation.email.valid = false;
+    validation.email.message = 'Email is required';
+  } else if (!emailRegex.test(form.email)) {
+    validation.email.valid = false;
+    validation.email.message = 'Invalid email address';
+  } else {
+    validation.email.valid = true;
+    validation.email.message = '';
+  }
 };
 
 const validateNameField = () => {
-  validation.name.valid = form.name.length >= 5 && form.name.length <= 250;
-  validation.name.message = validation.name.valid ? '' : 'Name must be between 5 and 250 characters.';
+  if (!form.name) {
+    validation.name.valid = false;
+    validation.name.message = 'Name is required';
+  } else if (form.name.length < 5) {
+    validation.name.valid = false;
+    validation.name.message = 'Name must be at least 5 characters';
+  } else if (form.name.length > 250) {
+    validation.name.valid = false;
+    validation.name.message = 'Name must not exceed 250 characters';
+  } else {
+    validation.name.valid = true;
+    validation.name.message = '';
+  }
 };
 
 const validatePasswordField = () => {
-  validation.password.valid = form.password.length >= 8;
-  validation.password.message = validation.password.valid ? '' : 'Password must be at least 8 characters.';
+  if (!form.password) {
+    validation.password.valid = false;
+    validation.password.message = 'Password is required';
+  } else if (form.password.length < 8) {
+    validation.password.valid = false;
+    validation.password.message = 'Password must be at least 8 characters';
+  } else {
+    validation.password.valid = true;
+    validation.password.message = '';
+  }
 };
 
 const validatePasswordConfirmationField = () => {
-  validation.passwordConfirmation.valid = form.password === form.passwordConfirmation;
-  validation.passwordConfirmation.message = validation.passwordConfirmation.valid ? '' : 'Passwords do not match.';
+  if (!form.passwordConfirmation) {
+    validation.passwordConfirmation.valid = false;
+    validation.passwordConfirmation.message = 'Password confirmation is required';
+  } else if (form.password !== form.passwordConfirmation) {
+    validation.passwordConfirmation.valid = false;
+    validation.passwordConfirmation.message = 'Passwords do not match';
+  } else {
+    validation.passwordConfirmation.valid = true;
+    validation.passwordConfirmation.message = '';
+  }
 };
 
 const isValid = computed(() => {
   return (
+      form.email.trim() !== '' &&
+      form.name.trim() !== '' &&
+      form.password.trim() !== '' &&
+      form.passwordConfirmation.trim() !== '' &&
       validation.email.valid &&
       validation.name.valid &&
       validation.password.valid &&
@@ -147,8 +168,7 @@ const isValid = computed(() => {
 
 const handleSubmit = () => {
   if (isValid.value) {
-    console.log(JSON.stringify(form));
+    console.log(form);
   }
 };
 </script>
-
